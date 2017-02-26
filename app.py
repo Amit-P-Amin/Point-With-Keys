@@ -1,25 +1,38 @@
 import pythoncom, pyHook
 
-class KeyHandler:
+class KeyboardHandler:
 
 	def __init__(self):
-		self.run = True 
+		self.shouldRun = True 
+		self.store     = []
+
+	def lastKey(self):
+		if len(self.store) == 0:
+			return ''
+		else:
+			return self.store[-1]
 
 	def OnKeyboardEvent(self, event):
 		print('Ascii:', event.Ascii, chr(event.Ascii))
-		self.run = False
-		return False	
+		print(self.lastKey())
+
+		if chr(event.Ascii) == 'e' and self.lastKey() != 'e':
+			self.store.append('e')
+			return False
+
+		if chr(event.Ascii) == 'e' and self.lastKey() == 'e':
+			self.store.pop()
+			self.shouldRun = False 
+			return False	
+
+		return True
 
 	def start(self):
-		# create a hook manager
-		hookManager = pyHook.HookManager()
-		# watch for all mouse events
+		hookManager         = pyHook.HookManager()
 		hookManager.KeyDown = self.OnKeyboardEvent
-		# set the hook
 		hookManager.HookKeyboard()
-		while self.run:
+
+		while self.shouldRun:
 			pythoncom.PumpWaitingMessages()
 
-x = KeyHandler()
-print(x)
-x.start()
+KeyboardHandler().start()
