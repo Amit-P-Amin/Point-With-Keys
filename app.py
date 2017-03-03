@@ -1,13 +1,8 @@
 from store import Store
 from state import State
+from sendInput import SendKeypress
 import pythoncom, pyHook
 import win32api, win32con
-
-KEY_E = 0x45
-
-ip.ki.wVk = 0x41; // virtual-key code for the "a" key
-ip.ki.dwFlags = 0; // 0 for key press
-SendInput(1, &ip, sizeof(INPUT));
 
 class KeyboardHandler:
 
@@ -29,7 +24,7 @@ class KeyboardHandler:
 
 			if chr(event.Ascii) != 'e' and lastPress == 'e':
 				# Exit sequence aborted, release 'e'
-				win32api.keybd_event(KEY_E,0,0,0)
+				SendKeypress(0x12)
 
 			if chr(event.Ascii) == 'e' and lastPress == 'e':
 				# Run 'ee' exit command
@@ -43,7 +38,7 @@ class KeyboardHandler:
 
 			if chr(event.Ascii) != 'a' and lastPress == 'a':
 				# Left click sequence aborted, release 'a'
-				return False
+				SendKeypress(0x1E)
 
 			if chr(event.Ascii) == 'a' and lastPress == 'a':
 				# Enter 'aa' left click mode
@@ -54,9 +49,9 @@ class KeyboardHandler:
 		if self.state.isPositioning():			
 			# Placeholder
 			if chr(event.Ascii) == 'a':
-				return False
 				self.store.clear()
 				self.state.clear()
+				return False
 
 		if event.Ascii == 27:
 			# Reset if 'esc' key entered
@@ -73,4 +68,4 @@ class KeyboardHandler:
 		while self.shouldRun:
 			pythoncom.PumpWaitingMessages()
 
-# KeyboardHandler().start()
+KeyboardHandler().start()
